@@ -1,0 +1,28 @@
+Cosas de RMI:
+* Cualquier objeto que se envie en java RMI tiene que ser SERIALIZABLE, REMOTO O PREDEFINIDO (string, int, etc).
+
+* Remote: se envia una referencia al objeto en otro computador (algo asi como un paso por referencia). Los cambios que se hagan se reflejan en la instancia original.
+   * Tiene sentido cuando:
+     1. El objeto es demasiado grande para ser transferido
+     2. Queremos afectar el estado del objeto original
+   * El servidor es un candidato para esto.
+
+   NOTA: Los metodos deben tirar 'RemoteException'
+   NOTA2: Recuerden exportar el objeto con UnicastRemoteObject
+
+
+* Serializable: se envia una copia exacta del objeto (algo asi como un paso por valor). Los cambios que se hagan en el otro computador no se reflejan en el objeto original (porque es una copia).
+   * Tiene sentido cuando:
+     1. El objeto es relativamente pequeño
+     2. Se van a invocar varias veces los metodos del objeto
+     3. No interesa modificar el estado interno del mismo
+   * Los mensajes son un candidato para esto.
+
+
+Arquitectura:
+* Servidor:
+  * Autenticar cliente: recibimos su nombre y le devolvemos una sesion
+  * Agregar contacto: recibimos sesion y nombre de contacto, y devolvemos la sesion del contacto agregado (si esta conectado).
+  * Enviar mensaje a contacto: recibimos el mensaje, la sesion de y la sesion hacia donde hay que enviar el mensaje.
+  * Recibir mensajes: recibimos una sesion y devolvemos todos los mensajes pendientes para esa sesion.
+  * Limpiar buffer: recibimos una sesion y limpiamos el buffer de mensajes pendientes.
