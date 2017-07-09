@@ -1,10 +1,15 @@
 package com.sgarcia;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.InputMismatchException;
-import java.util.Scanner;
+import java.net.UnknownHostException;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+
+import com.sgarcia.commons.gui.Gui;
+import com.sgarcia.commons.services.ServicioAutenticacionInterface;
+import com.sgarcia.commons.utils.Utils;
+import com.sgarcia.services.ServicioDiscoClienteImpl;
 
 /**
  * @author sergio
@@ -12,143 +17,144 @@ import java.util.Scanner;
  */
 public class Cliente {
 
-	public static void main(String[] args) {
-		Cliente cliente = new Cliente();
-		cliente.menuInicial();
-	}
+  private static ServicioAutenticacionInterface servicioAutenticacion;
 
-	public void menuInicial() {
-		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-		
-		try {
-			Integer opcion = 0;
-			do {
-				System.out.println("1. Registrar un nuevo usuario ");
-				System.out.println("2. Autenticarse en el sistema (hacer login) ");
-				System.out.println("3. Salir ");
-				
-				opcion = Integer.parseInt(reader.readLine().trim());
-				
-			} while (opcion < 1 || opcion > 3);
+  private static int sessionId = -1;
 
-			switch (opcion) {
-			case 1:
-				registrar();
-				break;
-			case 2:
-				autenticar();
-				break;
-			case 3:
-				System.exit(0);
-				break;
-			}
-		} catch (NumberFormatException nfe) {
-			System.out.println("Operacion no permitida");
-			menuInicial();
-		} catch (IOException ioe) {
-			throw new RuntimeException(ioe);
-		} finally {
-			try {
-				reader.close();
-			} catch (IOException ioe) {
-				throw new RuntimeException(ioe);
-			}
-		}
-	}
+  public static void main(String[] args)
+      throws RemoteException, NotBoundException, UnknownHostException {
 
-	private void registrar() {
-		Scanner scan = new Scanner(System.in);
-		System.out.println("\nIntroduzca el nombre de usuario: ");
-		String texto = scan.next();
-		scan.close();
+    Registry registry = LocateRegistry.getRegistry();
+    servicioAutenticacion = (ServicioAutenticacionInterface) registry
+        .lookup("rmi://127.0.0.1:9000/servicioAutenticacion");
 
-		this.menuInicial();
-	}
+    menuInicial();
+  }
 
-	private void autenticar() {
-		Scanner scan = new Scanner(System.in);
-		System.out.println("\nIntroduzca el nombre de usuario: ");
-		String texto = scan.next();
-		scan.close();
+  public static void menuInicial() throws RemoteException, UnknownHostException, NotBoundException {
 
-		this.menuPrincipal();
-	}
+    int option = 0;
 
-	public void menuPrincipal() {
-		Scanner scan = new Scanner(System.in);
-		
-		try {
-			int opcion = 0;
-			do {
-				System.out.println("1. Subir fichero ");
-				System.out.println("2. Bajar fichero ");
-				System.out.println("3. Borrar fichero ");
-				System.out.println("4. Compartir fichero ");
-				System.out.println("5. Listar ficheros ");
-				System.out.println("6. Listar Clientes del sistema ");
-				System.out.println("7. Salir ");
-				opcion = scan.nextInt();
-			} while (opcion < 1 || opcion > 7);
+    do {
+      option = Gui.menu(new String[] {"Registrar un nuevo usuario",
+          "Autenticarse en el sistema (hacer login)", "Salir"});
 
-			switch (opcion) {
-			case 1:
-				subirFichero();
-				break;
-			case 2:
-				bajarFichero();
-				break;
-			case 3:
-				borrarFichero();
-				break;
-			case 4:
-				compartirFichero();
-				break;
-			case 5:
-				listarFicheros();
-				break;
-			case 6:
-				listarClientes();
-				break;
-			case 7:
-				menuInicial();
-				break;
-			}
-		} catch (InputMismatchException ime) {
-			System.out.println("Operacion no permitida");
-		} finally {
-			scan.close();
-		}
+      switch (option) {
+        case 1:
+          registrar();
+          break;
+        case 2:
+          autenticar();
+          break;
+        case 3:
+          System.exit(0);
+          break;
+      }
+    } while (option >= 1 || option <= 3);
+  }
 
-		menuPrincipal();
-	}
+  private static void registrar() throws RemoteException {
+    String text = Gui.textInput("Introduzca el nombre de usuario:");
 
-	private void subirFichero() {
-		// TODO Auto-generated method stub
+    if (text != null && !text.isEmpty()) {
 
-	}
+      int sessionId = servicioAutenticacion.registrar(text);
 
-	private void bajarFichero() {
-		// TODO Auto-generated method stub
+      System.out.println("Usuario registrado con identificador: " + sessionId);
+    }
 
-	}
+  }
 
-	private void borrarFichero() {
-		// TODO Auto-generated method stub
+  private static void autenticar() throws RemoteException, UnknownHostException, NotBoundException {
+    int id = Gui.numberInput("Introduzca el identificador de usuario: ");
 
-	}
+    Registry registry = LocateRegistry.getRegistry();
 
-	private void compartirFichero() {
-		throw new UnsupportedOperationException("Not yet implemented");
-	}
+    // Registro de servicio de disco del cliente
+    ServicioDiscoClienteImpl servicioDiscoCliente = new ServicioDiscoClienteImpl();
+    Utils.registryService(registry, "servicioDiscoCliente/" + id, 9001, servicioDiscoCliente);
 
-	private void listarFicheros() {
-		// TODO Auto-generated method stub
+    boolean authenticated = false;
+    try{
+      authenticated = servicioAutenticacion.autenticar(id);
+    } catch(RuntimeException e){
+      System.out.print(e.getMessage() + " ");
+    }
 
-	}
+    if (!authenticated) {
+      System.out.println("El usuario no ha podido ser autenticado.");
+      Utils.unregistryService(registry, "servicioDiscoCliente/" + id, 9001, servicioDiscoCliente);
+    } else {
+      sessionId = id;
+      System.out.println("El usuario ha sido autenticado correctamente. Id: " + sessionId);
+    }
 
-	private void listarClientes() {
-		// TODO Auto-generated method stub
+  }
 
-	}
+  public void menuPrincipal() throws RemoteException, UnknownHostException, NotBoundException {
+
+    int option = 0;
+
+    do {
+      option = com.sgarcia.commons.gui.Gui
+          .menu(new String[] {"Subir fichero", "Bajar fichero", "Borrar fichero",
+              "Compartir fichero", "Listar ficheros", "Listar Clientes del sistema", "Salir"});
+
+      switch (option) {
+        case 1:
+          subirFichero();
+          break;
+        case 2:
+          bajarFichero();
+          break;
+        case 3:
+          borrarFichero();
+          break;
+        case 4:
+          compartirFichero();
+          break;
+        case 5:
+          listarFicheros();
+          break;
+        case 6:
+          listarClientes();
+          break;
+        case 7:
+          menuInicial();
+          break;
+      }
+    } while (option < 1 || option > 7);
+
+
+  }
+
+  private void subirFichero() {
+    // TODO Auto-generated method stub
+
+  }
+
+  private void bajarFichero() {
+    // TODO Auto-generated method stub
+
+  }
+
+  private void borrarFichero() {
+    // TODO Auto-generated method stub
+
+  }
+
+  private void compartirFichero() {
+    throw new UnsupportedOperationException("Not yet implemented");
+  }
+
+  private void listarFicheros() {
+    // TODO Auto-generated method stub
+
+  }
+
+  private void listarClientes() {
+    // TODO Auto-generated method stub
+
+  }
 
 }
