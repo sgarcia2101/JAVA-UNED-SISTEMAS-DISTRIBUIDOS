@@ -40,7 +40,6 @@ public class RMIUtils {
   public static Remote getServiceByName(String name) throws RemoteException {
     try {
       Registry registry = LocateRegistry.getRegistry();
-      String[] serviceList = registry.list();
       return registry.lookup(name);
     } catch (NotBoundException e) {
       throw new RuntimeException("No ha podido obtener el servicio " + name + ".");
