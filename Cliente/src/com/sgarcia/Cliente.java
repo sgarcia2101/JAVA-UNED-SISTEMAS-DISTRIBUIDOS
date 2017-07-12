@@ -1,14 +1,14 @@
 package com.sgarcia;
 
+import java.net.MalformedURLException;
 import java.net.UnknownHostException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
 
+import com.sgarcia.commons.constants.Constants;
 import com.sgarcia.commons.gui.Gui;
 import com.sgarcia.commons.services.ServicioAutenticacionInterface;
-import com.sgarcia.commons.utils.Utils;
+import com.sgarcia.commons.utils.RMIUtils;
 import com.sgarcia.services.ServicioDiscoClienteImpl;
 
 /**
@@ -17,27 +17,32 @@ import com.sgarcia.services.ServicioDiscoClienteImpl;
  */
 public class Cliente {
 
-  private static ServicioAutenticacionInterface servicioAutenticacion;
+  // private static ServicioAutenticacionInterface servicioAutenticacion;
+  //
+  // private static ServicioGestorInterface servicioGestor;
 
   private static int sessionId = -1;
 
   public static void main(String[] args)
-      throws RemoteException, NotBoundException, UnknownHostException {
+      throws RemoteException, NotBoundException, UnknownHostException, MalformedURLException {
 
-    Registry registry = LocateRegistry.getRegistry();
-    servicioAutenticacion = (ServicioAutenticacionInterface) registry
-        .lookup("rmi://127.0.0.1:9000/servicioAutenticacion");
+    // ServicioAutenticacionInterface servicioAutenticacion = ((ServicioAutenticacionInterface)
+    // RMIUtils
+    // .getServiceByName(Constants.NOMBRE_SERVICIO_AUTENTICACION));
+    //
+    // servicioGestor =
+    // ((ServicioGestorInterface) RMIUtils.getServiceByName(Constants.NOMBRE_SERVICIO_GESTOR));
 
     menuInicial();
   }
 
-  public static void menuInicial() throws RemoteException, UnknownHostException, NotBoundException {
+  public static void menuInicial()
+      throws RemoteException, UnknownHostException, NotBoundException, MalformedURLException {
 
     int option = 0;
 
     do {
-      option = Gui.menu(new String[] {"Registrar un nuevo usuario",
-          "Autenticarse en el sistema (hacer login)", "Salir"});
+      option = Gui.menu(new String[] {"Registrar un nuevo usuario", "Autenticar Usuario", "Salir"});
 
       switch (option) {
         case 1:
@@ -47,10 +52,10 @@ public class Cliente {
           autenticar();
           break;
         case 3:
-          System.exit(0);
+          cerrarSesion();
           break;
       }
-    } while (option >= 1 || option <= 3);
+    } while (option >= 1 && option <= 3);
   }
 
   private static void registrar() throws RemoteException {
@@ -58,40 +63,56 @@ public class Cliente {
 
     if (text != null && !text.isEmpty()) {
 
-      int sessionId = servicioAutenticacion.registrar(text);
+      ServicioAutenticacionInterface servicioAutenticacion =
+          ((ServicioAutenticacionInterface) RMIUtils
+              .getServiceByName(Constants.NOMBRE_SERVICIO_AUTENTICACION));
 
-      System.out.println("Usuario registrado con identificador: " + sessionId);
+      int id = servicioAutenticacion.registrarCliente(text);
+
+      System.out.println("Usuario registrado con identificador: " + id);
     }
 
   }
 
-  private static void autenticar() throws RemoteException, UnknownHostException, NotBoundException {
+  private static void autenticar()
+      throws RemoteException, UnknownHostException, NotBoundException, MalformedURLException {
     int id = Gui.numberInput("Introduzca el identificador de usuario: ");
 
-    Registry registry = LocateRegistry.getRegistry();
-
     // Registro de servicio de disco del cliente
-    ServicioDiscoClienteImpl servicioDiscoCliente = new ServicioDiscoClienteImpl();
-    Utils.registryService(registry, "servicioDiscoCliente/" + id, 9001, servicioDiscoCliente);
+    RMIUtils.registryService(Constants.NOMBRE_SERVICIO_DISCO_CLIENTE + "/" + id,
+        new ServicioDiscoClienteImpl());
 
     boolean authenticated = false;
-    try{
-      authenticated = servicioAutenticacion.autenticar(id);
-    } catch(RuntimeException e){
-      System.out.print(e.getMessage() + " ");
+    try {
+      ServicioAutenticacionInterface servicioAutenticacion =
+          ((ServicioAutenticacionInterface) RMIUtils
+              .getServiceByName(Constants.NOMBRE_SERVICIO_AUTENTICACION));
+
+      authenticated = servicioAutenticacion.autenticarCliente(id);
+    } catch (RuntimeException e) {
+      System.out.println(e.getMessage());
     }
 
     if (!authenticated) {
       System.out.println("El usuario no ha podido ser autenticado.");
-      Utils.unregistryService(registry, "servicioDiscoCliente/" + id, 9001, servicioDiscoCliente);
+      RMIUtils.unregistryService(Constants.NOMBRE_SERVICIO_DISCO_CLIENTE + "/" + id);
     } else {
+      System.out.println("El usuario ha sido autenticado correctamente. Id: " + id);
       sessionId = id;
-      System.out.println("El usuario ha sido autenticado correctamente. Id: " + sessionId);
     }
 
   }
 
-  public void menuPrincipal() throws RemoteException, UnknownHostException, NotBoundException {
+  private static void cerrarSesion()
+      throws RemoteException, MalformedURLException, NotBoundException {
+    if (sessionId != -1) {
+      RMIUtils.unregistryService(Constants.NOMBRE_SERVICIO_DISCO_CLIENTE + "/" + sessionId);
+    }
+    System.exit(0);
+  }
+
+  public void menuPrincipal()
+      throws RemoteException, UnknownHostException, NotBoundException, MalformedURLException {
 
     int option = 0;
 
@@ -123,7 +144,7 @@ public class Cliente {
           menuInicial();
           break;
       }
-    } while (option < 1 || option > 7);
+    } while (option >= 1 && option <= 7);
 
 
   }

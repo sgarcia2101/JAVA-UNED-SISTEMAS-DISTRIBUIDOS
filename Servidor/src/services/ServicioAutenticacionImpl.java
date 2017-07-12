@@ -2,61 +2,86 @@ package services;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.rmi.server.UnicastRemoteObject;
 
+import com.sgarcia.commons.constants.Constants;
+import com.sgarcia.commons.entities.Cliente;
 import com.sgarcia.commons.services.ServicioAutenticacionInterface;
-import com.sgarcia.commons.services.ServicioDiscoClienteInterface;
+import com.sgarcia.commons.services.ServicioDatosInterface;
+import com.sgarcia.commons.services.ServicioSrOperadorInterface;
+import com.sgarcia.commons.utils.RMIUtils;
 
 /**
  * @author sergio
  *
  */
-public class ServicioAutenticacionImpl implements ServicioAutenticacionInterface {
+public class ServicioAutenticacionImpl extends UnicastRemoteObject
+    implements ServicioAutenticacionInterface {
 
-  private Map<Integer, String> registroClientes = new HashMap<Integer, String>();
-  private Map<Integer, ServicioDiscoClienteInterface> serviciosDiscoCliente =
-      new HashMap<Integer, ServicioDiscoClienteInterface>();
+  private static final long serialVersionUID = 7102562566989123551L;
 
-  @Override
-  public int registrar(String nombre) throws RemoteException {
-    System.out.println("Registro: " + nombre);
-
-    int sessionId = getSesionId();
-    
-    registroClientes.put(sessionId, nombre);
-
-    return sessionId;
+  public ServicioAutenticacionImpl() throws RemoteException, NotBoundException {
+    super();
   }
 
   @Override
-  public boolean autenticar(int id) throws RemoteException {
-    System.out.println("Autenticación: " + id);
-    
-    if(!registroClientes.containsKey(id)){
-      throw new RuntimeException("Usuario no registrado!");
-    }
+  public int registrarCliente(String nombre) throws RemoteException {
+    ServicioDatosInterface servicioDatos =
+        ((ServicioDatosInterface) RMIUtils.getServiceByName(Constants.NOMBRE_SERVICIO_DATOS));
 
-    Registry registry = LocateRegistry.getRegistry();
-    try {
-      ServicioDiscoClienteInterface servicioDiscoCliente = (ServicioDiscoClienteInterface) registry
-          .lookup("rmi://127.0.0.1:9001/servicioDiscoCliente/" + id);
+    Cliente cliente = servicioDatos.registrarCliente(nombre);
 
-      serviciosDiscoCliente.put(id, servicioDiscoCliente);
+    ServicioSrOperadorInterface servicioSrOperador =
+        ((ServicioSrOperadorInterface) RMIUtils.getServiceByName(
+            Constants.NOMBRE_SERVICIO_SERVIDOR_OPERADOR + "/" + cliente.getRepositorioId()));
 
-      return true;
-    } catch (NotBoundException e) {
-      System.out.println("No ha podido identificarse servicio disco de cliente.");
-    }
+    servicioSrOperador.crearCarpetaCliente(cliente.getId());
 
-    return false;
+    return cliente.getId();
   }
 
-  private int getSesionId() {
-    return new AtomicInteger().incrementAndGet();
+  @Override
+  public int registrarRepositorio(String nombre) throws RemoteException {
+    ServicioDatosInterface servicioDatos =
+        ((ServicioDatosInterface) RMIUtils.getServiceByName(Constants.NOMBRE_SERVICIO_DATOS));
+
+    return servicioDatos.registrarRepositorio(nombre);
+  }
+
+  @Override
+  public boolean autenticarCliente(int id) throws RemoteException {
+    ServicioDatosInterface servicioDatos =
+        ((ServicioDatosInterface) RMIUtils.getServiceByName(Constants.NOMBRE_SERVICIO_DATOS));
+
+    if (servicioDatos.getCliente(id) == null) {
+      throw new RuntimeException("Usuario no registrado.");
+    }
+
+    if (!RMIUtils.existsService(Constants.NOMBRE_SERVICIO_DISCO_CLIENTE + "/" + id)) {
+      throw new RuntimeException("Servicio disco no disponible.");
+    }
+
+    return true;
+  }
+
+  @Override
+  public boolean autenticarRepositorio(int id) throws RemoteException {
+    ServicioDatosInterface servicioDatos =
+        ((ServicioDatosInterface) RMIUtils.getServiceByName(Constants.NOMBRE_SERVICIO_DATOS));
+
+    if (servicioDatos.getRepositorio(id) == null) {
+      throw new RuntimeException("Repositorio no registrado.");
+    }
+
+    if (!RMIUtils.existsService(Constants.NOMBRE_SERVICIO_CLIENTE_OPERADOR + "/" + id)) {
+      throw new RuntimeException("Servicio cliente-operador no disponible.");
+    }
+
+    if (!RMIUtils.existsService(Constants.NOMBRE_SERVICIO_SERVIDOR_OPERADOR + "/" + id)) {
+      throw new RuntimeException("Servicio servidor-operador no disponible.");
+    }
+
+    return true;
   }
 
 }

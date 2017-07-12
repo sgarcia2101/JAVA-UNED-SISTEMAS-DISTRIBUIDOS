@@ -1,4 +1,4 @@
-package com.sgarcia.commons;
+package com.sgarcia.commons.entities;
 
 import java.io.File;
 import java.io.FileInputStream;

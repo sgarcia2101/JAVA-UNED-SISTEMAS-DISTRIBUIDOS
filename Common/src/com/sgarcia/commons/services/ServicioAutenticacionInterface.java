@@ -5,8 +5,12 @@ import java.rmi.RemoteException;
 
 public interface ServicioAutenticacionInterface extends Remote {
 
-	public int registrar(String nombre) throws RemoteException;
+  public int registrarCliente(String nombre) throws RemoteException;
 
-	public boolean autenticar(int id) throws RemoteException;
+  public int registrarRepositorio(String nombre) throws RemoteException;
+
+  public boolean autenticarCliente(int id) throws RemoteException;
+
+  public boolean autenticarRepositorio(int id) throws RemoteException;
 
 }
