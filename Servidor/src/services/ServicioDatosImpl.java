@@ -95,9 +95,14 @@ public class ServicioDatosImpl extends UnicastRemoteObject implements ServicioDa
 
   @Override
   public List<Cliente> getClientesByRepositorioId(int repositorioId) throws RemoteException {
+    List<Cliente> clientes = new ArrayList<Cliente>();
+
     List<Integer> clientesId = relacionRepositorioClientes.get(Integer.valueOf(repositorioId));
 
-    List<Cliente> clientes = new ArrayList<Cliente>();
+    if (clientesId == null) {
+      return clientes;
+    }
+
     for (Integer clienteId : clientesId) {
       clientes.add(registroClientes.get(clienteId));
     }

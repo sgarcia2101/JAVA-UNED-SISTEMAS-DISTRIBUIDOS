@@ -1,13 +1,19 @@
 package com.sgarcia;
 
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.UnknownHostException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.util.List;
 
 import com.sgarcia.commons.constants.Constants;
+import com.sgarcia.commons.entities.Fichero;
 import com.sgarcia.commons.gui.Gui;
 import com.sgarcia.commons.services.ServicioAutenticacionInterface;
+import com.sgarcia.commons.services.ServicioClOperadorInterface;
+import com.sgarcia.commons.services.ServicioDatosInterface;
+import com.sgarcia.commons.services.ServicioGestorInterface;
 import com.sgarcia.commons.utils.RMIUtils;
 import com.sgarcia.services.ServicioDiscoClienteImpl;
 
@@ -17,22 +23,10 @@ import com.sgarcia.services.ServicioDiscoClienteImpl;
  */
 public class Cliente {
 
-  // private static ServicioAutenticacionInterface servicioAutenticacion;
-  //
-  // private static ServicioGestorInterface servicioGestor;
-
   private static int sessionId = -1;
 
   public static void main(String[] args)
       throws RemoteException, NotBoundException, UnknownHostException, MalformedURLException {
-
-    // ServicioAutenticacionInterface servicioAutenticacion = ((ServicioAutenticacionInterface)
-    // RMIUtils
-    // .getServiceByName(Constants.NOMBRE_SERVICIO_AUTENTICACION));
-    //
-    // servicioGestor =
-    // ((ServicioGestorInterface) RMIUtils.getServiceByName(Constants.NOMBRE_SERVICIO_GESTOR));
-
     menuInicial();
   }
 
@@ -49,7 +43,10 @@ public class Cliente {
           registrar();
           break;
         case 2:
-          autenticar();
+          boolean authenticated = autenticar();
+          if (authenticated) {
+            menuPrincipal();
+          }
           break;
         case 3:
           cerrarSesion();
@@ -59,7 +56,7 @@ public class Cliente {
   }
 
   private static void registrar() throws RemoteException {
-    String text = Gui.textInput("Introduzca el nombre de usuario:");
+    String text = Gui.textInput("Introduzca el nombre de usuario: ");
 
     if (text != null && !text.isEmpty()) {
 
@@ -74,13 +71,13 @@ public class Cliente {
 
   }
 
-  private static void autenticar()
+  private static boolean autenticar()
       throws RemoteException, UnknownHostException, NotBoundException, MalformedURLException {
     int id = Gui.numberInput("Introduzca el identificador de usuario: ");
 
     // Registro de servicio de disco del cliente
     RMIUtils.registryService(Constants.NOMBRE_SERVICIO_DISCO_CLIENTE + "/" + id,
-        new ServicioDiscoClienteImpl());
+        new ServicioDiscoClienteImpl(id));
 
     boolean authenticated = false;
     try {
@@ -99,8 +96,20 @@ public class Cliente {
     } else {
       System.out.println("El usuario ha sido autenticado correctamente. Id: " + id);
       sessionId = id;
+
+      crearCarpetaCliente(id);
     }
 
+    return authenticated;
+
+  }
+
+  private static void crearCarpetaCliente(int id) {
+    String carpetaDir = Constants.CARPETA_CLIENTE_PREFIX + String.valueOf(id);
+    File carpeta = new File(carpetaDir);
+    if (!carpeta.exists()) {
+      carpeta.mkdir();
+    }
   }
 
   private static void cerrarSesion()
@@ -111,7 +120,7 @@ public class Cliente {
     System.exit(0);
   }
 
-  public void menuPrincipal()
+  public static void menuPrincipal()
       throws RemoteException, UnknownHostException, NotBoundException, MalformedURLException {
 
     int option = 0;
@@ -149,33 +158,102 @@ public class Cliente {
 
   }
 
-  private void subirFichero() {
-    // TODO Auto-generated method stub
+  private static void subirFichero() throws RemoteException {
+    String nombreFichero = Gui.textInput("Introduzca el nombre del fichero: ");
+
+    ServicioGestorInterface servicioGestor =
+        ((ServicioGestorInterface) RMIUtils.getServiceByName(Constants.NOMBRE_SERVICIO_GESTOR));
+
+    Fichero fichero = null;
+    if (nombreFichero.split(File.separator).length > 1) {
+      String path = nombreFichero.substring(0, nombreFichero.lastIndexOf(File.separator));
+      String fileName = nombreFichero.substring(nombreFichero.lastIndexOf(File.separator) + 1, nombreFichero.length());
+      fichero = new Fichero(path, fileName, String.valueOf(sessionId));
+    } else {
+      fichero = new Fichero(nombreFichero, String.valueOf(sessionId));
+    }
+
+    String serviceName = servicioGestor.subir(fichero);
+
+    ServicioClOperadorInterface servicioClOperador =
+        ((ServicioClOperadorInterface) RMIUtils.getServiceByName(serviceName));
+
+    boolean uploaded = servicioClOperador.subir(fichero);
+
+    if (uploaded) {
+      System.out.println("El fichero se ha subido correctamente.");
+    } else {
+      System.out.println("No ha sido posible subir el fichero.");
+    }
+  }
+
+  private static void bajarFichero() throws RemoteException {
+    String nombreFichero = Gui.textInput("Introduzca el nombre del fichero: ");
+
+    ServicioGestorInterface servicioGestor =
+        ((ServicioGestorInterface) RMIUtils.getServiceByName(Constants.NOMBRE_SERVICIO_GESTOR));
+
+    boolean downloaded = servicioGestor.bajar(sessionId, nombreFichero);
+
+    if (downloaded) {
+      System.out.println("El fichero se ha descargado correctamente.");
+    } else {
+      System.out.println("No ha sido posible descargar el fichero.");
+    }
+  }
+
+  private static void borrarFichero() throws RemoteException {
+    String nombreFichero = Gui.textInput("Introduzca el nombre del fichero: ");
+
+    ServicioGestorInterface servicioGestor =
+        ((ServicioGestorInterface) RMIUtils.getServiceByName(Constants.NOMBRE_SERVICIO_GESTOR));
+
+    Fichero fichero = new Fichero(nombreFichero, String.valueOf(sessionId));
+
+    String serviceName = servicioGestor.borrar(fichero);
+
+    ServicioClOperadorInterface servicioClOperador =
+        ((ServicioClOperadorInterface) RMIUtils.getServiceByName(serviceName));
+
+    boolean deleted = servicioClOperador.borrar(fichero);
+
+    if (deleted) {
+      System.out.println("El fichero se ha borrado correctamente.");
+    } else {
+      System.out.println("No ha sido posible borrar el fichero.");
+    }
 
   }
 
-  private void bajarFichero() {
-    // TODO Auto-generated method stub
-
-  }
-
-  private void borrarFichero() {
-    // TODO Auto-generated method stub
-
-  }
-
-  private void compartirFichero() {
+  private static void compartirFichero() {
     throw new UnsupportedOperationException("Not yet implemented");
   }
 
-  private void listarFicheros() {
-    // TODO Auto-generated method stub
+  private static void listarFicheros() throws RemoteException {
+    ServicioGestorInterface servicioGestor =
+        ((ServicioGestorInterface) RMIUtils.getServiceByName(Constants.NOMBRE_SERVICIO_GESTOR));
 
+    List<String> listaFicheros = servicioGestor.listar(sessionId);
+
+    System.out.println("          Listado de Ficheros           ");
+    System.out.println("----------------------------------------");
+    for (String fichero : listaFicheros) {
+      System.out.println(fichero);
+    }
   }
 
-  private void listarClientes() {
-    // TODO Auto-generated method stub
+  private static void listarClientes() throws RemoteException {
 
+    ServicioDatosInterface servicioDatos =
+        ((ServicioDatosInterface) RMIUtils.getServiceByName(Constants.NOMBRE_SERVICIO_DATOS));
+
+    List<com.sgarcia.commons.entities.Cliente> clientes = servicioDatos.getClientes();
+
+    System.out.println("          Listado de Clientes           ");
+    System.out.println("----------------------------------------");
+    for (com.sgarcia.commons.entities.Cliente cliente : clientes) {
+      System.out.println(String.format("%3s", cliente.getId()) + " | " + cliente.getNombre());
+    }
   }
 
 }

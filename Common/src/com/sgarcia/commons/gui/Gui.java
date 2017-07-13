@@ -35,7 +35,7 @@ public class Gui {
     System.out.print(msg);
 
     int number = Integer.parseInt(readLine());
-
+   
     return number;
   }
 
@@ -52,7 +52,10 @@ public class Gui {
     int option = -1;
 
     do {
-      option = Integer.parseInt(readLine().trim());
+      try {
+        option = Integer.parseInt(readLine().trim());
+      } catch (NumberFormatException e) {
+      }
 
       if (option >= options.length + 1 || option <= 0) {
         System.out.print("Introduzca una opción válida: ");

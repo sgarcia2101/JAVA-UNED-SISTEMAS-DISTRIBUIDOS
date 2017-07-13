@@ -5,6 +5,7 @@ import java.net.MalformedURLException;
 import java.net.UnknownHostException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.sgarcia.commons.constants.Constants;
@@ -12,6 +13,7 @@ import com.sgarcia.commons.entities.Cliente;
 import com.sgarcia.commons.gui.Gui;
 import com.sgarcia.commons.services.ServicioAutenticacionInterface;
 import com.sgarcia.commons.services.ServicioDatosInterface;
+import com.sgarcia.commons.utils.FileUtils;
 import com.sgarcia.commons.utils.RMIUtils;
 import com.sgarcia.services.ServicioClOperadorImpl;
 import com.sgarcia.services.ServicioSrOperadorImpl;
@@ -146,14 +148,30 @@ public class Repositorio {
 
     List<Cliente> clientes = servicioDatos.getClientesByRepositorioId(sessionId);
 
-    System.out.println(" Listado de Clientes ");
-    System.out.println("---------------------");
+    System.out.println("          Listado de Clientes           ");
+    System.out.println("----------------------------------------");
     for (Cliente cliente : clientes) {
       System.out.println(String.format("%3s", cliente.getId()) + " | " + cliente.getNombre());
     }
   }
 
   private static void listarFicherosCliente() {
-    System.out.println("Listar Ficheros Cliente");
+    int clienteId = Gui.numberInput("Introduzca el identificador de usuario: ");
+    
+    String carpetaDir = Constants.CARPETA_REPOSITORIO_PREFIX + String.valueOf(sessionId) + File.separator
+        + Constants.CARPETA_CLIENTE_PREFIX + String.valueOf(clienteId);
+    List<File> ficheros = FileUtils.listarFicherosCarpeta(carpetaDir);
+
+    List<String> listaFicheros = new ArrayList<String>();
+    for (File fichero : ficheros) {
+      listaFicheros.add(fichero.getName());
+    }
+    
+    System.out.println();
+    System.out.println("        Listar Ficheros Cliente         ");
+    System.out.println("----------------------------------------");
+    for (String fichero : listaFicheros) {
+      System.out.println(fichero);
+    }
   }
 }

@@ -1,5 +1,6 @@
 package services;
 
+import java.io.File;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
@@ -33,7 +34,7 @@ public class ServicioAutenticacionImpl extends UnicastRemoteObject
 
     ServicioSrOperadorInterface servicioSrOperador =
         ((ServicioSrOperadorInterface) RMIUtils.getServiceByName(
-            Constants.NOMBRE_SERVICIO_SERVIDOR_OPERADOR + "/" + cliente.getRepositorioId()));
+            Constants.NOMBRE_SERVICIO_SERVIDOR_OPERADOR + File.separator + cliente.getRepositorioId()));
 
     servicioSrOperador.crearCarpetaCliente(cliente.getId());
 

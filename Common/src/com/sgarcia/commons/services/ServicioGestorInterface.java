@@ -8,12 +8,12 @@ import com.sgarcia.commons.entities.Fichero;
 
 public interface ServicioGestorInterface extends Remote {
 
-  public int subir(Fichero fichero) throws RemoteException;
+  public String subir(Fichero fichero) throws RemoteException;
 
-  public Fichero bajar(int id) throws RemoteException;
+  public boolean bajar(int clienteId, String name) throws RemoteException;
 
-  public boolean borrar(int id) throws RemoteException;
+  public String borrar(Fichero fichero) throws RemoteException;
 
-  public List<Fichero> listar(int id) throws RemoteException;
+  public List<String> listar(int id) throws RemoteException;
 
 }

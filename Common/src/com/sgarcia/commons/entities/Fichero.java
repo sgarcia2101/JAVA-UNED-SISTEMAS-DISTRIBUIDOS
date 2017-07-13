@@ -48,13 +48,13 @@ public class Fichero implements Serializable {
 
 			c.close();
 
+	        checksum = c.getChecksum().getValue();
+
 		} catch (FileNotFoundException ef) {
 			System.err.println("Fichero no encontrado");
 		} catch (IOException e) {
 			System.err.println("Error leyendo fichero" + e.toString());
 		}
-
-		checksum = c.getChecksum().getValue();
 
 	}
 
@@ -67,9 +67,9 @@ public class Fichero implements Serializable {
 		peso = 0;
 
 		try {
-			c = new CheckedInputStream(new FileInputStream(ruta + "\\" + nombre), new CRC32());
+			c = new CheckedInputStream(new FileInputStream(ruta + File.separator + nombre), new CRC32());
 
-			peso = new File(ruta + "\\" + nombre).length();
+			peso = new File(ruta + File.separator + nombre).length();
 			data = new byte[(int) this.peso];
 
 			while (c.read(data) >= 0) {
@@ -77,13 +77,13 @@ public class Fichero implements Serializable {
 
 			c.close();
 
+	        checksum = c.getChecksum().getValue();
+
 		} catch (FileNotFoundException ef) {
 			System.err.println("Fichero no encontrado");
 		} catch (IOException e) {
 			System.err.println("Error leyendo fichero" + e.toString());
 		}
-
-		checksum = c.getChecksum().getValue();
 
 	}
 
