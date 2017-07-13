@@ -1,4 +1,4 @@
-package services;
+package com.sgarcia.servidor.services;
 
 import java.io.File;
 import java.rmi.NotBoundException;
@@ -12,19 +12,35 @@ import com.sgarcia.commons.services.ServicioDatosInterface;
 import com.sgarcia.commons.services.ServicioSrOperadorInterface;
 import com.sgarcia.commons.utils.RMIUtils;
 
+
 /**
- * @author sergio
+ * The Class ServicioAutenticacionImpl.
  *
+ * @author Sergio Garcia Lalana
+ * @email sergiopedrola@gmail.com
  */
 public class ServicioAutenticacionImpl extends UnicastRemoteObject
     implements ServicioAutenticacionInterface {
 
+  /** The Constant serialVersionUID. */
   private static final long serialVersionUID = 7102562566989123551L;
 
+  /**
+   * Instantiates a new servicio autenticacion impl.
+   *
+   * @throws RemoteException the remote exception
+   * @throws NotBoundException the not bound exception
+   */
   public ServicioAutenticacionImpl() throws RemoteException, NotBoundException {
     super();
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see
+   * com.sgarcia.commons.services.ServicioAutenticacionInterface#registrarCliente(java.lang.String)
+   */
   @Override
   public int registrarCliente(String nombre) throws RemoteException {
     ServicioDatosInterface servicioDatos =
@@ -32,15 +48,22 @@ public class ServicioAutenticacionImpl extends UnicastRemoteObject
 
     Cliente cliente = servicioDatos.registrarCliente(nombre);
 
-    ServicioSrOperadorInterface servicioSrOperador =
-        ((ServicioSrOperadorInterface) RMIUtils.getServiceByName(
-            Constants.NOMBRE_SERVICIO_SERVIDOR_OPERADOR + File.separator + cliente.getRepositorioId()));
+    ServicioSrOperadorInterface servicioSrOperador = ((ServicioSrOperadorInterface) RMIUtils
+        .getServiceByName(Constants.NOMBRE_SERVICIO_SERVIDOR_OPERADOR + File.separator
+            + cliente.getRepositorioId()));
 
     servicioSrOperador.crearCarpetaCliente(cliente.getId());
 
     return cliente.getId();
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see
+   * com.sgarcia.commons.services.ServicioAutenticacionInterface#registrarRepositorio(java.lang.
+   * String)
+   */
   @Override
   public int registrarRepositorio(String nombre) throws RemoteException {
     ServicioDatosInterface servicioDatos =
@@ -49,6 +72,11 @@ public class ServicioAutenticacionImpl extends UnicastRemoteObject
     return servicioDatos.registrarRepositorio(nombre);
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.sgarcia.commons.services.ServicioAutenticacionInterface#autenticarCliente(int)
+   */
   @Override
   public boolean autenticarCliente(int id) throws RemoteException {
     ServicioDatosInterface servicioDatos =
@@ -65,6 +93,11 @@ public class ServicioAutenticacionImpl extends UnicastRemoteObject
     return true;
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.sgarcia.commons.services.ServicioAutenticacionInterface#autenticarRepositorio(int)
+   */
   @Override
   public boolean autenticarRepositorio(int id) throws RemoteException {
     ServicioDatosInterface servicioDatos =

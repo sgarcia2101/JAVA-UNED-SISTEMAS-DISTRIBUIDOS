@@ -4,23 +4,23 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+/**
+ * The Class Gui.
+ *
+ * @author Sergio Garcia Lalana
+ * @email sergiopedrola@gmail.com
+ */
 public class Gui {
 
+  /** The reader. */
   private static BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 
-  // public static String[] input(String name, String[] msgs) {
-  // String[] inputs = new String[msgs.length];
-  //
-  // System.out.println(("=== " + name + " ===");
-  //
-  // for (int i = 0; i < msgs.length; i++) {
-  // inputs[i] = input(msgs[i]);
-  // }
-  //
-  // return inputs;
-  // }
-  //
-
+  /**
+   * Text input.
+   *
+   * @param msg the msg
+   * @return the string
+   */
   public static String textInput(String msg) {
 
     System.out.print(msg);
@@ -30,15 +30,27 @@ public class Gui {
     return line;
   }
 
+  /**
+   * Number input.
+   *
+   * @param msg the msg
+   * @return the int
+   */
   public static int numberInput(String msg) {
 
     System.out.print(msg);
 
     int number = Integer.parseInt(readLine());
-   
+
     return number;
   }
 
+  /**
+   * Menu.
+   *
+   * @param options the options
+   * @return the int
+   */
   public static int menu(String[] options) {
 
     System.out.println();
@@ -68,19 +80,11 @@ public class Gui {
     return option;
   }
 
-  //
-  // private static void System.out.println((String msg) {
-  // System.out.println(msg);
-  // }
-  //
-  // private static void newLine() {
-  // System.out.println();
-  // }
-  //
-  // private static void out(String msg) {
-  // System.out.print(msg);
-  // }
-  //
+  /**
+   * Read line.
+   *
+   * @return the string
+   */
   private static String readLine() {
     try {
       return reader.readLine();

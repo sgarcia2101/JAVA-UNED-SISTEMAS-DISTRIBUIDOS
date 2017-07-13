@@ -1,4 +1,4 @@
-package com.sgarcia;
+package com.sgarcia.cliente;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -7,6 +7,7 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.List;
 
+import com.sgarcia.cliente.services.ServicioDiscoClienteImpl;
 import com.sgarcia.commons.constants.Constants;
 import com.sgarcia.commons.entities.Fichero;
 import com.sgarcia.commons.gui.Gui;
@@ -15,21 +16,40 @@ import com.sgarcia.commons.services.ServicioClOperadorInterface;
 import com.sgarcia.commons.services.ServicioDatosInterface;
 import com.sgarcia.commons.services.ServicioGestorInterface;
 import com.sgarcia.commons.utils.RMIUtils;
-import com.sgarcia.services.ServicioDiscoClienteImpl;
 
 /**
- * @author sergio
+ * The Class Cliente.
  *
+ * @author Sergio Garcia Lalana
+ * @email sergiopedrola@gmail.com
  */
 public class Cliente {
 
+  /** The session id. */
   private static int sessionId = -1;
 
+  /**
+   * The main method.
+   *
+   * @param args the arguments
+   * @throws RemoteException the remote exception
+   * @throws NotBoundException the not bound exception
+   * @throws UnknownHostException the unknown host exception
+   * @throws MalformedURLException the malformed URL exception
+   */
   public static void main(String[] args)
       throws RemoteException, NotBoundException, UnknownHostException, MalformedURLException {
     menuInicial();
   }
 
+  /**
+   * Menu inicial.
+   *
+   * @throws RemoteException the remote exception
+   * @throws UnknownHostException the unknown host exception
+   * @throws NotBoundException the not bound exception
+   * @throws MalformedURLException the malformed URL exception
+   */
   public static void menuInicial()
       throws RemoteException, UnknownHostException, NotBoundException, MalformedURLException {
 
@@ -55,6 +75,11 @@ public class Cliente {
     } while (option >= 1 && option <= 3);
   }
 
+  /**
+   * Registrar.
+   *
+   * @throws RemoteException the remote exception
+   */
   private static void registrar() throws RemoteException {
     String text = Gui.textInput("Introduzca el nombre de usuario: ");
 
@@ -71,6 +96,15 @@ public class Cliente {
 
   }
 
+  /**
+   * Autenticar.
+   *
+   * @return true, if successful
+   * @throws RemoteException the remote exception
+   * @throws UnknownHostException the unknown host exception
+   * @throws NotBoundException the not bound exception
+   * @throws MalformedURLException the malformed URL exception
+   */
   private static boolean autenticar()
       throws RemoteException, UnknownHostException, NotBoundException, MalformedURLException {
     int id = Gui.numberInput("Introduzca el identificador de usuario: ");
@@ -104,6 +138,11 @@ public class Cliente {
 
   }
 
+  /**
+   * Crear carpeta cliente.
+   *
+   * @param id the id
+   */
   private static void crearCarpetaCliente(int id) {
     String carpetaDir = Constants.CARPETA_CLIENTE_PREFIX + String.valueOf(id);
     File carpeta = new File(carpetaDir);
@@ -112,6 +151,13 @@ public class Cliente {
     }
   }
 
+  /**
+   * Cerrar sesion.
+   *
+   * @throws RemoteException the remote exception
+   * @throws MalformedURLException the malformed URL exception
+   * @throws NotBoundException the not bound exception
+   */
   private static void cerrarSesion()
       throws RemoteException, MalformedURLException, NotBoundException {
     if (sessionId != -1) {
@@ -120,6 +166,14 @@ public class Cliente {
     System.exit(0);
   }
 
+  /**
+   * Menu principal.
+   *
+   * @throws RemoteException the remote exception
+   * @throws UnknownHostException the unknown host exception
+   * @throws NotBoundException the not bound exception
+   * @throws MalformedURLException the malformed URL exception
+   */
   public static void menuPrincipal()
       throws RemoteException, UnknownHostException, NotBoundException, MalformedURLException {
 
@@ -158,6 +212,11 @@ public class Cliente {
 
   }
 
+  /**
+   * Subir fichero.
+   *
+   * @throws RemoteException the remote exception
+   */
   private static void subirFichero() throws RemoteException {
     String nombreFichero = Gui.textInput("Introduzca el nombre del fichero: ");
 
@@ -167,7 +226,8 @@ public class Cliente {
     Fichero fichero = null;
     if (nombreFichero.split(File.separator).length > 1) {
       String path = nombreFichero.substring(0, nombreFichero.lastIndexOf(File.separator));
-      String fileName = nombreFichero.substring(nombreFichero.lastIndexOf(File.separator) + 1, nombreFichero.length());
+      String fileName = nombreFichero.substring(nombreFichero.lastIndexOf(File.separator) + 1,
+          nombreFichero.length());
       fichero = new Fichero(path, fileName, String.valueOf(sessionId));
     } else {
       fichero = new Fichero(nombreFichero, String.valueOf(sessionId));
@@ -187,6 +247,11 @@ public class Cliente {
     }
   }
 
+  /**
+   * Bajar fichero.
+   *
+   * @throws RemoteException the remote exception
+   */
   private static void bajarFichero() throws RemoteException {
     String nombreFichero = Gui.textInput("Introduzca el nombre del fichero: ");
 
@@ -202,6 +267,11 @@ public class Cliente {
     }
   }
 
+  /**
+   * Borrar fichero.
+   *
+   * @throws RemoteException the remote exception
+   */
   private static void borrarFichero() throws RemoteException {
     String nombreFichero = Gui.textInput("Introduzca el nombre del fichero: ");
 
@@ -225,10 +295,18 @@ public class Cliente {
 
   }
 
+  /**
+   * Compartir fichero.
+   */
   private static void compartirFichero() {
     throw new UnsupportedOperationException("Not yet implemented");
   }
 
+  /**
+   * Listar ficheros.
+   *
+   * @throws RemoteException the remote exception
+   */
   private static void listarFicheros() throws RemoteException {
     ServicioGestorInterface servicioGestor =
         ((ServicioGestorInterface) RMIUtils.getServiceByName(Constants.NOMBRE_SERVICIO_GESTOR));
@@ -242,6 +320,11 @@ public class Cliente {
     }
   }
 
+  /**
+   * Listar clientes.
+   *
+   * @throws RemoteException the remote exception
+   */
   private static void listarClientes() throws RemoteException {
 
     ServicioDatosInterface servicioDatos =

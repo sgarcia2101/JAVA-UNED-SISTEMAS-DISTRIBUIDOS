@@ -1,4 +1,4 @@
-package services;
+package com.sgarcia.servidor.services;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
@@ -13,23 +13,50 @@ import com.sgarcia.commons.entities.Cliente;
 import com.sgarcia.commons.entities.Repositorio;
 import com.sgarcia.commons.services.ServicioDatosInterface;
 
+/**
+ * The Class ServicioDatosImpl.
+ *
+ * @author Sergio Garcia Lalana
+ * @email sergiopedrola@gmail.com
+ */
 public class ServicioDatosImpl extends UnicastRemoteObject implements ServicioDatosInterface {
 
+  /** The Constant serialVersionUID. */
   private static final long serialVersionUID = 5211348462046004324L;
 
+  /** The registro clientes. */
   private Map<Integer, Cliente> registroClientes = new HashMap<Integer, Cliente>();
+
+  /** The registro repositorios. */
   private Map<Integer, Repositorio> registroRepositorios = new HashMap<Integer, Repositorio>();
+
+  /** The relacion cliente repositorio. */
   private Map<Integer, Integer> relacionClienteRepositorio = new HashMap<Integer, Integer>();
+
+  /** The relacion repositorio clientes. */
   private Map<Integer, List<Integer>> relacionRepositorioClientes =
       new HashMap<Integer, List<Integer>>();
 
+  /** The usuarios cont. */
   private int usuariosCont = 0;
+
+  /** The repositorios cont. */
   private int repositoriosCont = 0;
 
+  /**
+   * Instantiates a new servicio datos impl.
+   *
+   * @throws RemoteException the remote exception
+   */
   public ServicioDatosImpl() throws RemoteException {
     super();
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.sgarcia.commons.services.ServicioDatosInterface#registrarCliente(java.lang.String)
+   */
   @Override
   public Cliente registrarCliente(String nombre) throws RemoteException {
     int id = ++usuariosCont;
@@ -49,6 +76,11 @@ public class ServicioDatosImpl extends UnicastRemoteObject implements ServicioDa
     return usuario;
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.sgarcia.commons.services.ServicioDatosInterface#registrarRepositorio(java.lang.String)
+   */
   @Override
   public int registrarRepositorio(String nombre) throws RemoteException {
     int id = ++repositoriosCont;
@@ -57,26 +89,51 @@ public class ServicioDatosImpl extends UnicastRemoteObject implements ServicioDa
     return id;
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.sgarcia.commons.services.ServicioDatosInterface#getCliente(int)
+   */
   @Override
   public Cliente getCliente(int id) throws RemoteException {
     return registroClientes.get(id);
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.sgarcia.commons.services.ServicioDatosInterface#getRepositorio(int)
+   */
   @Override
   public Repositorio getRepositorio(int id) throws RemoteException {
     return registroRepositorios.get(id);
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.sgarcia.commons.services.ServicioDatosInterface#getClientes()
+   */
   @Override
   public List<Cliente> getClientes() throws RemoteException {
     return new ArrayList<Cliente>(registroClientes.values());
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.sgarcia.commons.services.ServicioDatosInterface#getRepositorios()
+   */
   @Override
   public List<Repositorio> getRepositorios() throws RemoteException {
     return new ArrayList<Repositorio>(registroRepositorios.values());
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.sgarcia.commons.services.ServicioDatosInterface#getRepositoriosClientes()
+   */
   @Override
   public Map<Repositorio, List<Cliente>> getRepositoriosClientes() throws RemoteException {
     Map<Repositorio, List<Cliente>> repositoriosClientes =
@@ -93,6 +150,11 @@ public class ServicioDatosImpl extends UnicastRemoteObject implements ServicioDa
     return repositoriosClientes;
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see com.sgarcia.commons.services.ServicioDatosInterface#getClientesByRepositorioId(int)
+   */
   @Override
   public List<Cliente> getClientesByRepositorioId(int repositorioId) throws RemoteException {
     List<Cliente> clientes = new ArrayList<Cliente>();

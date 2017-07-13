@@ -1,4 +1,4 @@
-package com.sgarcia;
+package com.sgarcia.repositorio;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -15,18 +15,42 @@ import com.sgarcia.commons.services.ServicioAutenticacionInterface;
 import com.sgarcia.commons.services.ServicioDatosInterface;
 import com.sgarcia.commons.utils.FileUtils;
 import com.sgarcia.commons.utils.RMIUtils;
-import com.sgarcia.services.ServicioClOperadorImpl;
-import com.sgarcia.services.ServicioSrOperadorImpl;
+import com.sgarcia.repositorio.services.ServicioClOperadorImpl;
+import com.sgarcia.repositorio.services.ServicioSrOperadorImpl;
 
+/**
+ * The Class Repositorio.
+ *
+ * @author Sergio Garcia Lalana
+ * @email sergiopedrola@gmail.com
+ */
 public class Repositorio {
 
+  /** The session id. */
   private static int sessionId = -1;
 
+  /**
+   * The main method.
+   *
+   * @param args the arguments
+   * @throws RemoteException the remote exception
+   * @throws NotBoundException the not bound exception
+   * @throws UnknownHostException the unknown host exception
+   * @throws MalformedURLException the malformed URL exception
+   */
   public static void main(String[] args)
       throws RemoteException, NotBoundException, UnknownHostException, MalformedURLException {
     menuInicial();
   }
 
+  /**
+   * Menu inicial.
+   *
+   * @throws RemoteException the remote exception
+   * @throws UnknownHostException the unknown host exception
+   * @throws NotBoundException the not bound exception
+   * @throws MalformedURLException the malformed URL exception
+   */
   public static void menuInicial()
       throws RemoteException, UnknownHostException, NotBoundException, MalformedURLException {
 
@@ -53,6 +77,11 @@ public class Repositorio {
     } while (option >= 1 && option <= 3);
   }
 
+  /**
+   * Registrar.
+   *
+   * @throws RemoteException the remote exception
+   */
   private static void registrar() throws RemoteException {
     String text = Gui.textInput("Introduzca el nombre de repositorio: ");
 
@@ -69,6 +98,15 @@ public class Repositorio {
 
   }
 
+  /**
+   * Autenticar.
+   *
+   * @return true, if successful
+   * @throws RemoteException the remote exception
+   * @throws UnknownHostException the unknown host exception
+   * @throws NotBoundException the not bound exception
+   * @throws MalformedURLException the malformed URL exception
+   */
   private static boolean autenticar()
       throws RemoteException, UnknownHostException, NotBoundException, MalformedURLException {
     int id = Gui.numberInput("Introduzca el identificador de repositorio: ");
@@ -107,6 +145,12 @@ public class Repositorio {
 
   }
 
+  /**
+   * Crear carpeta repositorio.
+   *
+   * @param repositorioId the repositorio id
+   * @throws RemoteException the remote exception
+   */
   private static void crearCarpetaRepositorio(int repositorioId) throws RemoteException {
     String carpetaDir = Constants.CARPETA_REPOSITORIO_PREFIX + String.valueOf(repositorioId);
     File carpeta = new File(carpetaDir);
@@ -115,6 +159,14 @@ public class Repositorio {
     }
   }
 
+  /**
+   * Menu principal.
+   *
+   * @throws RemoteException the remote exception
+   * @throws UnknownHostException the unknown host exception
+   * @throws NotBoundException the not bound exception
+   * @throws MalformedURLException the malformed URL exception
+   */
   public static void menuPrincipal()
       throws RemoteException, UnknownHostException, NotBoundException, MalformedURLException {
 
@@ -142,6 +194,11 @@ public class Repositorio {
 
   }
 
+  /**
+   * Listar clientes.
+   *
+   * @throws RemoteException the remote exception
+   */
   private static void listarClientes() throws RemoteException {
     ServicioDatosInterface servicioDatos =
         ((ServicioDatosInterface) RMIUtils.getServiceByName(Constants.NOMBRE_SERVICIO_DATOS));
@@ -155,18 +212,21 @@ public class Repositorio {
     }
   }
 
+  /**
+   * Listar ficheros cliente.
+   */
   private static void listarFicherosCliente() {
     int clienteId = Gui.numberInput("Introduzca el identificador de usuario: ");
-    
-    String carpetaDir = Constants.CARPETA_REPOSITORIO_PREFIX + String.valueOf(sessionId) + File.separator
-        + Constants.CARPETA_CLIENTE_PREFIX + String.valueOf(clienteId);
+
+    String carpetaDir = Constants.CARPETA_REPOSITORIO_PREFIX + String.valueOf(sessionId)
+        + File.separator + Constants.CARPETA_CLIENTE_PREFIX + String.valueOf(clienteId);
     List<File> ficheros = FileUtils.listarFicherosCarpeta(carpetaDir);
 
     List<String> listaFicheros = new ArrayList<String>();
     for (File fichero : ficheros) {
       listaFicheros.add(fichero.getName());
     }
-    
+
     System.out.println();
     System.out.println("        Listar Ficheros Cliente         ");
     System.out.println("----------------------------------------");

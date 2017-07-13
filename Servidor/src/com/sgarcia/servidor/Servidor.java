@@ -1,4 +1,7 @@
-package com.sgarcia;
+/*
+ * 
+ */
+package com.sgarcia.servidor;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -15,17 +18,25 @@ import com.sgarcia.commons.entities.Repositorio;
 import com.sgarcia.commons.gui.Gui;
 import com.sgarcia.commons.services.ServicioDatosInterface;
 import com.sgarcia.commons.utils.RMIUtils;
-
-import services.ServicioAutenticacionImpl;
-import services.ServicioDatosImpl;
-import services.ServicioGestorImpl;
+import com.sgarcia.servidor.services.ServicioAutenticacionImpl;
+import com.sgarcia.servidor.services.ServicioDatosImpl;
+import com.sgarcia.servidor.services.ServicioGestorImpl;
 
 /**
- * @author sergio
+ * The Class Servidor.
  *
+ * @author Sergio Garcia Lalana
+ * @email sergiopedrola@gmail.com
  */
 public class Servidor {
 
+  /**
+   * The main method.
+   *
+   * @param args the arguments
+   * @throws NotBoundException the not bound exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   public static void main(String[] args) throws NotBoundException, IOException {
 
     RMIUtils.startRegistry();
@@ -43,6 +54,14 @@ public class Servidor {
     menuInicial();
   }
 
+  /**
+   * Menu inicial.
+   *
+   * @throws RemoteException the remote exception
+   * @throws UnknownHostException the unknown host exception
+   * @throws NotBoundException the not bound exception
+   * @throws MalformedURLException the malformed URL exception
+   */
   public static void menuInicial()
       throws RemoteException, UnknownHostException, NotBoundException, MalformedURLException {
 
@@ -69,6 +88,11 @@ public class Servidor {
     } while (option >= 1 && option <= 4);
   }
 
+  /**
+   * Listar clientes.
+   *
+   * @throws RemoteException the remote exception
+   */
   private static void listarClientes() throws RemoteException {
     ServicioDatosInterface servicioDatos =
         ((ServicioDatosInterface) RMIUtils.getServiceByName(Constants.NOMBRE_SERVICIO_DATOS));
@@ -82,6 +106,11 @@ public class Servidor {
     }
   }
 
+  /**
+   * Listar repositorios.
+   *
+   * @throws RemoteException the remote exception
+   */
   private static void listarRepositorios() throws RemoteException {
     ServicioDatosInterface servicioDatos =
         ((ServicioDatosInterface) RMIUtils.getServiceByName(Constants.NOMBRE_SERVICIO_DATOS));
@@ -96,6 +125,11 @@ public class Servidor {
     }
   }
 
+  /**
+   * Listar parejas repositorio cliente.
+   *
+   * @throws RemoteException the remote exception
+   */
   private static void listarParejasRepositorioCliente() throws RemoteException {
     ServicioDatosInterface servicioDatos =
         ((ServicioDatosInterface) RMIUtils.getServiceByName(Constants.NOMBRE_SERVICIO_DATOS));
@@ -116,6 +150,13 @@ public class Servidor {
     }
   }
 
+  /**
+   * Salir.
+   *
+   * @throws RemoteException the remote exception
+   * @throws MalformedURLException the malformed URL exception
+   * @throws NotBoundException the not bound exception
+   */
   private static void salir() throws RemoteException, MalformedURLException, NotBoundException {
     RMIUtils.unregistryService(Constants.NOMBRE_SERVICIO_AUTENTICACION);
     RMIUtils.unregistryService(Constants.NOMBRE_SERVICIO_GESTOR);
