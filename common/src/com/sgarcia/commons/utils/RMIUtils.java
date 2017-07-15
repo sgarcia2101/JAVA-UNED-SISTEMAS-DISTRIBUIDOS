@@ -20,9 +20,7 @@ public class RMIUtils {
 
     } catch (RemoteException ex) {
       // No valid registry at that port.
-      System.out.println("RMI registry cannot be located at port " + Constants.PORT);
       LocateRegistry.createRegistry(Constants.PORT);
-      System.out.println("RMI registry created at port " + Constants.PORT);
 
     }
   }
