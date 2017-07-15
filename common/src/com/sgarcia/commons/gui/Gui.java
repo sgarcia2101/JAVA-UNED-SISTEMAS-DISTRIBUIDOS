@@ -59,7 +59,7 @@ public class Gui {
       System.out.println((i + 1) + ".- " + options[i]);
     }
 
-    System.out.print("Introduzca una opción: ");
+    System.out.print("Introduzca una opcion: ");
 
     int option = -1;
 
@@ -70,7 +70,7 @@ public class Gui {
       }
 
       if (option >= options.length + 1 || option <= 0) {
-        System.out.print("Introduzca una opción válida: ");
+        System.out.print("Introduzca una opcion valida: ");
         option = -1;
       }
     } while (option == -1);
